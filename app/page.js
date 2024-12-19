@@ -18,6 +18,10 @@ export default function Home() {
       },
       body: JSON.stringify({
         prompt: e.target.prompt.value,
+        hf_lora: e.target.hf_lora.value,
+        aspect_ratio: e.target.aspect_ratio.value,
+        output_format: e.target.output_format.value,
+        disable_safety_checker: e.target.disable_safety_checker.value==="on",
       }),
     });
     let prediction = await response.json();
@@ -46,21 +50,65 @@ export default function Home() {
   return (
     <div className="container max-w-2xl mx-auto p-5">
       <h1 className="py-6 text-center font-bold text-2xl">
-        Dream something with{" "}
-        <a href="https://replicate.com/stability-ai/sdxl?utm_source=project&utm_project=getting-started">
-          SDXL
+        Generate something with{" "}
+        <a href="https://replicate.com/lucataco/flux-dev-lora">
+          lucataco/flux-dev-lora
         </a>
       </h1>
  
-      <form className="w-full flex" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          className="flex-grow"
-          name="prompt"
-          placeholder="Enter a prompt to display an image"
-        />
-        <button className="button" type="submit">
-          Go!
+      <form className="w-full flex flex-col gap-4" onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="prompt">prompt &nbsp;<span className="text-sm">string</span></label>
+          <input
+            type="text"
+            // className="flex-grow"
+            id="prompt"
+            name="prompt"
+            placeholder="Enter a prompt to display an image"
+            // defaultValue="SOFIA posing in paris fashion week."
+          />
+        </div>
+        <div>
+        <label htmlFor="hf_lora">hf_lora &nbsp;<span className="text-sm">string</span></label>
+          <input
+            type="text"
+            // className="flex-grow"
+            id="hf_lora"
+            name="hf_lora"
+            defaultValue="thelonejordan/flux-lora-sofia"
+          />
+        </div>
+        <div>
+          <label htmlFor="aspect_ratio">aspect_ratio &nbsp;<span className="text-sm">string</span></label>
+          <select className="border border-black px-[18px] py-[15px] rounded-md w-[100%]" id="aspect_ratio">
+            <option>1:1</option>
+            <option>3:2</option>
+            <option>2:3</option>
+            <option>4:5</option>
+            <option>5:4</option>
+            <option>3:4</option>
+            <option>4:3</option>
+            <option>9:16</option>
+            <option>16:9</option>
+            <option>9:21</option>
+            <option>21:9</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="output_format">output_format &nbsp;<span className="text-sm">string</span></label>
+          <select className="border border-black px-[18px] py-[15px] rounded-md w-[100%]" id="output_format">
+            <option>webp</option>
+            <option>jpg</option>
+            <option>png</option>
+          </select>
+        </div>
+        <div className="flex">
+          <input type="checkbox" className="w-min" id="disable_safety_checker" name="disable_safety_checker" defaultChecked />
+          <label htmlFor="disable_safety_checker">disable_safety_checker</label>
+        </div>
+
+        <button className="button w-min bg-indigo-400" type="submit">
+          Submit
         </button>
       </form>
  

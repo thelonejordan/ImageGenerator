@@ -17,12 +17,12 @@ export async function POST(request) {
       'The REPLICATE_API_TOKEN environment variable is not set. See README.md for instructions on how to set it.'
     );
   }
- 
-  const { prompt } = await request.json();
+  const { prompt, hf_lora, aspect_ratio, output_format, disable_safety_checker } = await request.json();
  
   const options = {
-    version: '8beff3369e81422112d93b89ca01426147de542cd4684c244b673b105188fe5f',
-    input: { prompt }
+    model: "lucataco/flux-dev-lora",
+    version: '091495765fa5ef2725a175a57b276ec30dc9d39c22d30410f2ede68a3eab66b3',
+    input: { prompt, hf_lora, aspect_ratio, output_format, disable_safety_checker }
   }
  
   if (WEBHOOK_HOST) {
