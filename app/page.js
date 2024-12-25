@@ -8,6 +8,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export default function Home() {
   const [prediction, setPrediction] = useState(null);
   const [error, setError] = useState(null);
+
+  const handleImageClick = (imageUrl) => {
+    window.open(imageUrl, "_blank"); // Open the link in a new tab
+  };
  
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -124,6 +128,8 @@ export default function Home() {
                 sizes="100vw"
                 height={768}
                 width={768}
+                onClick={() => handleImageClick(prediction.output[prediction.output.length - 1])}
+                className="cursor-pointer"
               />
             </div>
           )}

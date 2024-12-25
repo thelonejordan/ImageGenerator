@@ -43,3 +43,12 @@ form button {
 .jetbrains {
   font-family: "JetBrains";
 }
+
+.image-wrapper img {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.image-wrapper img:hover {
+  transform: scale(1.05);
+}
