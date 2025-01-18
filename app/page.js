@@ -1,10 +1,10 @@
 'use client';
- 
+
 import { useState } from "react";
 import Image from "next/image";
- 
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
- 
+
 export default function Home() {
   const [prediction, setPrediction] = useState(null);
   const [error, setError] = useState(null);
@@ -12,7 +12,7 @@ export default function Home() {
   const handleImageClick = (imageUrl) => {
     window.open(imageUrl, "_blank"); // Open the link in a new tab
   };
- 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const response = await fetch("/api/predictions", {
@@ -25,7 +25,7 @@ export default function Home() {
         hf_lora: e.target.hf_lora.value,
         aspect_ratio: e.target.aspect_ratio.value,
         output_format: e.target.output_format.value,
-        disable_safety_checker: e.target.disable_safety_checker.value==="on",
+        disable_safety_checker: e.target.disable_safety_checker.value === "on",
       }),
     });
     let prediction = await response.json();
@@ -34,23 +34,26 @@ export default function Home() {
       return;
     }
     setPrediction(prediction);
- 
+
+    // TODO: use webhooks instead. https://replicate.com/docs/topics/webhooks
+    // TODO: also disable submit button while predicting
+    // https://replicate.com/docs/topics/predictions/create-a-prediction#polling
     while (
       prediction.status !== "succeeded" &&
       prediction.status !== "failed"
     ) {
       await sleep(1000);
-      const response = await fetch("/api/predictions/" + prediction.id);
+      const response = await fetch(`/api/predictions/${prediction.id}`);
       prediction = await response.json();
       if (response.status !== 200) {
         setError(prediction.detail);
         return;
       }
-      console.log({ prediction: prediction });
+      // console.log({ prediction: prediction });
       setPrediction(prediction);
     }
   };
- 
+
   return (
     <div className="container max-w-2xl mx-auto p-5">
       <h1 className="py-6 text-center font-bold text-2xl">
@@ -59,7 +62,7 @@ export default function Home() {
           lucataco/flux-dev-lora
         </a>
       </h1>
- 
+
       <form className="w-full flex flex-col gap-4" onSubmit={handleSubmit}>
         <div>
           <label htmlFor="prompt">prompt &nbsp;<span className="text-sm">string</span></label>
@@ -69,11 +72,11 @@ export default function Home() {
             id="prompt"
             name="prompt"
             placeholder="Enter a prompt to display an image"
-            // defaultValue="SOFIA posing in paris fashion week."
+          // defaultValue="SOFIA posing in paris fashion week."
           />
         </div>
         <div>
-        <label htmlFor="hf_lora">hf_lora &nbsp;<span className="text-sm">string</span></label>
+          <label htmlFor="hf_lora">hf_lora &nbsp;<span className="text-sm">string</span></label>
           <input
             type="text"
             // className="flex-grow"
@@ -101,9 +104,9 @@ export default function Home() {
         <div>
           <label htmlFor="output_format">output_format &nbsp;<span className="text-sm">string</span></label>
           <select className="border border-black px-[18px] py-[15px] rounded-md w-[100%]" id="output_format">
+            <option>png</option>
             <option>webp</option>
             <option>jpg</option>
-            <option>png</option>
           </select>
         </div>
         <div className="flex">
@@ -115,9 +118,9 @@ export default function Home() {
           Submit
         </button>
       </form>
- 
+
       {error && <div>{error}</div>}
- 
+
       {prediction && (
         <>
           {prediction.output && (
