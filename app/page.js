@@ -7,6 +7,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export default function Home() {
   const [prediction, setPrediction] = useState(null);
+  const [state, setState] = useState('idle');
   const [error, setError] = useState(null);
 
   const handleImageClick = (imageUrl) => {
@@ -15,42 +16,47 @@ export default function Home() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch("/api/predictions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prompt: e.target.prompt.value,
-        hf_lora: e.target.hf_lora.value,
-        aspect_ratio: e.target.aspect_ratio.value,
-        output_format: e.target.output_format.value,
-        disable_safety_checker: e.target.disable_safety_checker.value === "on",
-      }),
-    });
-    let prediction = await response.json();
-    if (response.status !== 201) {
-      setError(prediction.detail);
-      return;
-    }
-    setPrediction(prediction);
-
-    // TODO: use webhooks instead. https://replicate.com/docs/topics/webhooks
-    // TODO: also disable submit button while predicting
-    // https://replicate.com/docs/topics/predictions/create-a-prediction#polling
-    while (
-      prediction.status !== "succeeded" &&
-      prediction.status !== "failed"
-    ) {
-      await sleep(1000);
-      const response = await fetch(`/api/predictions/${prediction.id}`);
-      prediction = await response.json();
-      if (response.status !== 200) {
+    if (state === 'idle') {
+      setState('processing')
+      const response = await fetch("/api/predictions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: e.target.prompt.value,
+          hf_lora: e.target.hf_lora.value,
+          aspect_ratio: e.target.aspect_ratio.value,
+          output_format: e.target.output_format.value,
+          disable_safety_checker: e.target.disable_safety_checker.value === "on",
+        }),
+      });
+      let prediction = await response.json();
+      if (response.status !== 201) {
         setError(prediction.detail);
         return;
       }
-      // console.log({ prediction: prediction });
       setPrediction(prediction);
+
+      // TODO: use webhooks instead. https://replicate.com/docs/topics/webhooks
+      // TODO: also disable submit button while predicting
+      // https://replicate.com/docs/topics/predictions/create-a-prediction#polling
+      while (
+        prediction.status !== "succeeded" &&
+        prediction.status !== "failed"
+      ) {
+        await sleep(1000);
+        const response = await fetch(`/api/predictions/${prediction.id}`);
+        prediction = await response.json();
+        if (response.status !== 200) {
+          setError(prediction.detail);
+          setState('idle')
+          return;
+        }
+        // console.log({ prediction: prediction });
+        setPrediction(prediction);
+      }
+      setState('idle')
     }
   };
 
